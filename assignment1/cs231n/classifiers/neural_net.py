@@ -80,7 +80,10 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+
+        z = X.dot(W1) + b1
+        h = np.maximum(z,0)   #ReLU!!!
+        scores = h.dot(W2) + b2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -98,7 +101,13 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        #??? 음... yi만이 아니라 모든 j에 대해서 계산해야되나???
+        scores_exp = np.exp(scores)
+        scores_exp_correct = scores_exp[y]
+        # print(scores_exp_correct)
+        scores_exp_sum = np.sum(scores_exp)
+        # print(scores_exp_sum)
+        loss = -np.sum(np.log(scores_exp_correct/scores_exp_sum))/N + reg*(np.sum(W1*W1) + np.sum(W2*W2))/2
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
