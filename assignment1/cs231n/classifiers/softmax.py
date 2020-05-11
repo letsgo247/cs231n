@@ -25,6 +25,10 @@ def softmax_loss_naive(W, X, y, reg):
     loss = 0.0
     dW = np.zeros_like(W)
 
+    N = X.shape[0]
+    D = X.shape[1]
+    C = W.shape[1]
+
     #############################################################################
     # TODO: Compute the softmax loss and its gradient using explicit loops.     #
     # Store the loss in loss and the gradient in dW. If you are not careful     #
@@ -33,7 +37,80 @@ def softmax_loss_naive(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+
+    # [Cheat]
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+    
+    for i in range(num_train):
+        scores = X[i].dot(W)
+        scores -= np.max(scores)
+        
+        scores_exp = np.sum(np.exp(scores))
+        correct_exp = np.exp(scores[y[i]])
+
+        loss -= np.log(correct_exp / scores_exp)
+
+
+        for j in range(num_classes):
+            if j == y[i]:
+              dW[:,y[i]] -= (scores_exp - correct_exp) / scores_exp * X[i]
+            else:
+              dW[:,j] += np.exp(scores[j])/scores_exp * X[i]
+
+    loss /= num_train
+    dW /= num_train
+
+    loss += reg * np.sum(W*W)
+    dW += 2*reg*W 
+
+
+
+    # [Second Try]
+    # f = X.dot(W)
+    # C_reg = np.max(f)
+    # f_reged = f - C_reg
+    # f_reged_exp = np.exp(f_reged)    
+    # L = np.zeros(y.shape)
+    # print(L.shape)
+
+    # for i in range(N):
+    #   L[i] = -np.log(f_reged_exp[i,y[i]]/np.sum(f_reged_exp[i]))
+
+    #   for j in range(C):
+    #     if j == y[i]:
+    #       dW[:,j] += X[i] * (f_reged_exp[i,j]/np.sum(f_reged_exp[i]) - 1)
+          
+    #     else:
+    #       dW[:,j] += X[i] * (f_reged_exp[i,j]/np.sum(f_reged_exp[i]))
+      
+    # loss = L[i].sum()/N + reg * np.sum(W*W) 
+    # dW = dW/N + 2*reg*W
+
+
+
+
+
+    #[First Try]
+    # f = X.dot(W)
+    # C_reg = f.max(axis=1)
+    # f_reged = f - C_reg.reshape(N,1)
+    # f_reged_exp = np.exp(f_reged)
+    # L = np.zeros(y.shape)
+
+    # for i in range(N):
+    #   L[i] = -np.log(f_reged_exp[i,y[i]]/f_reged_exp[i].sum())
+
+    #   for j in range(C):
+    #     if j == y[i]:
+    #       dW[:,j] += X[i] * (f_reged_exp[i,j]/f_reged_exp[i].sum() - 1)
+          
+    #     else:
+    #       dW[:,j] += X[i] * (f_reged_exp[i,j]/f_reged_exp[i].sum())
+      
+    # loss = L[i].sum() + reg * (W*W).sum() 
+    # dW = dW/N + 2*reg*W
+    
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -58,7 +135,24 @@ def softmax_loss_vectorized(W, X, y, reg):
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+
+    scores = X.dot(W)
+    scores -= np.max(scores)
+
+    scores_exp = np.exp(scores)
+    scores_expsum = np.sum(scores_exp,axis = 1)
+    correct_exp = scores_exp[range(num_train),y]
+
+    loss = correct_exp / scores_expsum
+    loss = -np.sum(np.log(loss))/num_train + reg*np.sum(W*W)
+
+    s = np.divide(scores_exp, scores_expsum.reshape(num_train,1))
+    s[range(num_train),y] = -(scores_expsum - correct_exp) / scores_expsum
+    dW = X.T.dot(s)
+    dW /= num_train
+    dW += 2*reg*W
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
