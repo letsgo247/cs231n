@@ -162,14 +162,14 @@ class TwoLayerNet(object):
 
 
 
-        ds = np.copy(scores_exp/scores_exp_sum.reshape(N,1))
+        ds = np.copy(scores_exp/scores_exp_sum.reshape(N,1))  #대상이 score 아니고 e 아니고 P였음! 그래야 1 빼는 맛이 나지 아무렴!
         ds[np.arange(N),y] -= 1
         
         db2 = np.sum(ds,axis=0)/N
         grads['b2'] = db2
 
-        dW2 = h.T.dot(ds) /N
-        grads['W2'] = dW2 + 2*reg*W2
+        dW2 = h.T.dot(ds) /N  #이유는 잘 모르겠지만 암튼 N 나눠줘야함!
+        grads['W2'] = dW2 + 2*reg*W2  #reg 도 잊지 말아야함!!!
 
         dh = ds.dot(W2.T)
         
@@ -182,6 +182,7 @@ class TwoLayerNet(object):
         dW1 = X.T.dot(dz) /N
         grads['W1'] = dW1 + 2*reg*W1
 
+        # print(grads)
 
 
 
@@ -228,7 +229,13 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            rndidx = np.random.choice(range(num_train), batch_size, replace=True)
+            X_batch = X[rndidx]
+            # print(X_batch)
+            y_batch = y[rndidx]
+            # print(y_batch)
+
+            
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -244,7 +251,10 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            pass
+            self.params['W1'] -= learning_rate * grads['W1']    #grads 가 아니라 self.params 에 저장해야되는거였음!!!
+            self.params['W2'] -= learning_rate * grads['W2']
+            self.params['b1'] -= learning_rate * grads['b1']
+            self.params['b2'] -= learning_rate * grads['b2']
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -290,7 +300,9 @@ class TwoLayerNet(object):
         ###########################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+        scores = self.loss(X)
+        y_pred = np.argmax(scores,axis=1)
+
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
