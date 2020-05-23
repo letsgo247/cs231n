@@ -84,6 +84,7 @@ class TwoLayerNet(object):
         z = X.dot(W1) + b1
         h = np.maximum(z,0)   #ReLU!!!
         scores = h.dot(W2) + b2
+        # print(scores)
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -92,7 +93,7 @@ class TwoLayerNet(object):
             return scores
 
         # Compute the loss
-        loss = None
+        loss = 0
         #############################################################################
         # TODO: Finish the forward pass, and compute the loss. This should include  #
         # both the data loss and L2 regularization for W1 and W2. Store the result  #
@@ -101,13 +102,32 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        #??? 음... yi만이 아니라 모든 j에 대해서 계산해야되나???
+
+
+
         scores_exp = np.exp(scores)
-        scores_exp_correct = scores_exp[y]
+        # print(scores_exp)
+        # print(y.reshape(N,1))
+        scores_exp_correct = scores_exp[np.arange(N),y]
         # print(scores_exp_correct)
-        scores_exp_sum = np.sum(scores_exp)
+        scores_exp_sum = np.sum(scores_exp,axis=1)
         # print(scores_exp_sum)
-        loss = -np.sum(np.log(scores_exp_correct/scores_exp_sum))/N + reg*(np.sum(W1*W1) + np.sum(W2*W2))/2
+        loss = -np.sum(np.log(scores_exp_correct/scores_exp_sum))/N + reg*(np.sum(W1*W1) + np.sum(W2*W2))
+
+
+
+
+        # # compute softmax probabilities
+        # out = np.exp(scores)      # (N, C)
+        # out /= np.sum(out, axis=1).reshape(N, 1)
+        
+        # # compute softmax loss
+        # loss -= np.sum(np.log(out[np.arange(N), y]))
+        # loss /= N
+        # loss += reg * (np.sum(W1**2) + np.sum(W2**2))
+
+
+
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -120,7 +140,50 @@ class TwoLayerNet(object):
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-        pass
+
+
+
+        # # back propagation
+        # dout = np.copy(out)  # (N, C)
+        # dout[np.arange(N), y] -= 1
+        # dh = np.dot(dout, W2.T)
+        # dz = np.dot(dout, W2.T) * (z > 0)  # (N, H)
+        
+        # # compute gradient for parameters
+        # grads['W2'] = np.dot(h.T, dout) / N      # (H, C)
+        # grads['b2'] = np.sum(dout, axis=0) / N      # (C,)
+        # grads['W1'] = np.dot(X.T, dz) / N        # (D, H)
+        # grads['b1'] = np.sum(dz, axis=0) / N       # (H,)
+        
+        # # add reg term
+        # grads['W2'] += 2 * reg * W2
+        # grads['W1'] += 2 * reg * W1
+
+
+
+
+        ds = np.copy(scores_exp/scores_exp_sum.reshape(N,1))
+        ds[np.arange(N),y] -= 1
+        
+        db2 = np.sum(ds,axis=0)/N
+        grads['b2'] = db2
+
+        dW2 = h.T.dot(ds) /N
+        grads['W2'] = dW2 + 2*reg*W2
+
+        dh = ds.dot(W2.T)
+        
+        positivez = z>0
+        dz = dh * positivez
+
+        db1 = np.sum(dz,axis=0)/N
+        grads['b1'] = db1
+
+        dW1 = X.T.dot(dz) /N
+        grads['W1'] = dW1 + 2*reg*W1
+
+
+
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
