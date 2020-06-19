@@ -28,7 +28,14 @@ def affine_forward(x, w, b):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    N = x.shape[0]
+    D, M = w.shape
+
+    x_copy = x.reshape(N,-1)
+    # print(x.shape)
+    
+    out = np.dot(x_copy,w) + b
+    # print(out.shape)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -55,13 +62,19 @@ def affine_backward(dout, cache):
     - db: Gradient with respect to b, of shape (M,)
     """
     x, w, b = cache
+    N = x.shape[0]
+    input_shape = x.shape[1:]
+    D, M = w.shape
+
     dx, dw, db = None, None, None
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    db = np.sum(dout, axis=0)
+    dx = np.dot(dout, w.T).reshape(N,*input_shape)
+    dw = np.dot(x.reshape(N,-1).T, dout)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -87,7 +100,8 @@ def relu_forward(x):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    out = x * (x>0)
+    # print(out)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -114,7 +128,7 @@ def relu_backward(dout, cache):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    dx = dout * (x>0)
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
