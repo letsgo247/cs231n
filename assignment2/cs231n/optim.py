@@ -39,7 +39,7 @@ def sgd(w, dw, config=None):
     """
     if config is None:
         config = {}
-    config.setdefault("learning_rate", 1e-2)
+    config.setdefault("learning_rate", 1e-2)  #if 안에 넣어도 되는거 아닌가? 왜 굳이 밖에 나와있는거지?
 
     w -= config["learning_rate"] * dw
     return w, config
@@ -56,11 +56,15 @@ def sgd_momentum(w, dw, config=None):
     - velocity: A numpy array of the same shape as w and dw used to store a
       moving average of the gradients.
     """
+
     if config is None:
         config = {}
     config.setdefault("learning_rate", 1e-2)
     config.setdefault("momentum", 0.9)
+    
+
     v = config.get("velocity", np.zeros_like(w))
+
 
     next_w = None
     ###########################################################################
@@ -69,7 +73,10 @@ def sgd_momentum(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    v = config["momentum"]*v - config["learning_rate"]*dw
+    next_w = w + v
+
+    # w -= config["learning_rate"] * dw
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -107,7 +114,9 @@ def rmsprop(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    cache = config['decay_rate']*config['cache'] + (1-config['decay_rate'])* dw**2
+    next_w = w - config['learning_rate']*dw / (np.sqrt(cache)+config['epsilon'])
+    config['cache'] = cache
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
@@ -152,7 +161,25 @@ def adam(w, dw, config=None):
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-    pass
+    lr = config['learning_rate']
+    b1 = config['beta1']
+    b2 = config['beta2']
+    eps = config['epsilon']
+    m = config['m']
+    v = config['v']
+    t = config['t']
+    t += 1
+
+    m = b1*m + (1-b1)*dw
+    mt = m / (1-b1**t)
+    v = b2*v + (1-b2)*(dw**2)
+    vt = v / (1-b2**t)
+    next_w = w - lr*mt / (np.sqrt(vt) + eps)
+    
+    # config = {'t':t, 'm':m, 'v':v}
+    config['t'] = t
+    config['m'] = m
+    config['v'] = v
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
